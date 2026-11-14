@@ -1,0 +1,34 @@
+name: marine
+# Copernicus Marine waves and sea level every 6 hours (spec 8), plus a manual run that builds the backtest history.
+on:
+  schedule: [{ cron: "15 */6 * * *" }]
+  workflow_dispatch:
+    inputs:
+      history:
+        description: "Build the backtest wave history instead (writes an artifact)"
+        type: boolean
+        default: false
+permissions: { contents: read }
+jobs:
+  marine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COPERNICUSMARINE_USERNAME: ${{ secrets.COPERNICUSMARINE_USERNAME }}
+      COPERNICUSMARINE_PASSWORD: ${{ secrets.COPERNICUSMARINE_PASSWORD }}
+      INGEST_URL: ${{ secrets.INGEST_URL }}
+      INGEST_HMAC_KEY: ${{ secrets.INGEST_HMAC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install copernicusmarine numpy
+      - name: Latest waves and sea level to the site
+        if: ${{ !inputs.history }}
+        run: python marine/fetch_marine.py
+      - name: Backtest history
+        if: ${{ inputs.history }}
+        run: python marine/history.py
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.history }}
+        with: { name: ferry-waves-daily, path: history/ferry-waves-daily.json }

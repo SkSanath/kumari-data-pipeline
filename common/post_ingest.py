@@ -3,7 +3,8 @@ import hashlib, hmac, json, os, sys, time, urllib.request
 from datetime import datetime, timezone
 
 def post(path: str, payload: dict) -> int:
-    clean = lambda s: s.replace("\ufeff", "").strip()\n    base, key = clean(os.environ["INGEST_URL"]).rstrip("/"), clean(os.environ["INGEST_HMAC_KEY"])
+    clean = lambda s: s.replace("\ufeff", "").strip()
+    base, key = clean(os.environ["INGEST_URL"]).rstrip("/"), clean(os.environ["INGEST_HMAC_KEY"])
     body = json.dumps(payload, separators=(",", ":"))
     ts = str(int(time.time() * 1000))
     sig = hmac.new(key.encode(), f"{ts}.{body}".encode(), hashlib.sha256).hexdigest()
