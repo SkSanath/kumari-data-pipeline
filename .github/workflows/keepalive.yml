@@ -1,0 +1,17 @@
+name: keepalive
+on:
+  schedule: [{ cron: "0 3 1 * *" }]
+  workflow_dispatch:
+permissions: { contents: write }
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: date -u +%FT%TZ > last-run.txt
+      - run: |
+          git config user.name "keepalive"; git config user.email "keepalive@users.noreply.github.com"
+          git add last-run.txt; git commit -m "keepalive" || true; git push
+      - name: Test ping to site ingest
+        env: { INGEST_URL: "${{ secrets.INGEST_URL }}", INGEST_HMAC_KEY: "${{ secrets.INGEST_HMAC_KEY }}" }
+        run: python common/post_ingest.py ping
