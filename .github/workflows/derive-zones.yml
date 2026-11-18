@@ -1,0 +1,22 @@
+name: derive-zones
+# Copernicus DEM GLO-30 -> draft catchment zones A and B + preview PNG, as an artifact.
+# Nothing is committed or sent to the site; the owner checks the preview before the zones are used.
+on:
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  derive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CDSE_CLIENT_ID: ${{ secrets.CDSE_CLIENT_ID }}
+      CDSE_CLIENT_SECRET: ${{ secrets.CDSE_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - run: python sat/derive_zones.py --out out/zones
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: derived-zones, path: out/zones }
