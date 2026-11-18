@@ -9,3 +9,12 @@ Public repo (GitHub Actions). Phase 0: keep-alive + signed test ping. Move this 
 - Backtest history: run the workflow by hand with "history" ticked, download the `ferry-waves-daily` artifact, put it in the site repo at `data/backtest/ferry-waves-daily.json`, then `npm run backtest:ferry`.
 - Not yet run (no account when written). On the first run, read the log: dataset variables, the grid cells picked, and whether sea level was found (`CMEMS_SEALEVEL_VAR`, default `zos`).
 - Credit wherever shown: "Generated using E.U. Copernicus Marine Service Information".
+
+## Thirparappu water estimate (SATELLITE_WATER_SPEC.md)
+- Signed measurements go to `/api/ingest/signals` with `common/measurement.py` (`measurement(...)` checks each row; `send(rows)`).
+- `config/processing.yaml`: pipeline-only settings (Otsu clamps, S2 masks, TN-SMART URL patterns). Rule thresholds live in the site repo (`config/falls-thresholds.yaml`).
+- `aoi/*.geojson`: placeholders (`"status": "draft"`) until the owner draws them. Do not invent coordinates.
+- `docs/events.csv`: dated past events for the backtest (public-safe). `docs/data-sources.md`: sources, licences, endpoints.
+- Tests: `.github/workflows/tests.yml` runs `pytest` (Python 3.11, `requirements-water.txt`).
+- **TN-SMART PDFs and their numbers are never committed here** (licence not stated).
+- **TN-SMART** (`tnsmart/`): `parse.py` reads the four Kanniyakumari dams from the bulletin text and refuses rows whose numbers disagree; `fetch_parse.py` fetches, parses and sends rows marked private (`--from/--to` for backfill, `--dry-run`). Workflow `tnsmart.yml` is manual until the site route is deployed. For local real-PDF tests, put bulletins in the git-ignored `tnsmart_cache/` as `YYYY-MM-DD.pdf`.

@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "status": "draft",
+  "todo": "Owner draws, same method as Pechiparai. Check it covers enough 10 m pixels.",
+  "what": "Largest Chittar II reservoir extent + buffer",
+  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+  "features": []
+}

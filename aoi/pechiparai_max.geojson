@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "status": "draft",
+  "todo": "Owner draws a rough box (QGIS over a Sentinel-2 image). Phase 2: replace with pixels that were water in >=5% of all S1 images in the backfill.",
+  "what": "Largest Pechiparai reservoir extent + ~100 m buffer",
+  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+  "features": []
+}

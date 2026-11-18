@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "status": "draft",
+  "todo": "Owner picks one straight reach between Pechiparai and the falls, ideally 30-40 m wide (>=3 pixels across at 10 m). Add the centreline length in properties.centreline_m.",
+  "what": "River width reach on the Kodayar",
+  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+  "features": []
+}

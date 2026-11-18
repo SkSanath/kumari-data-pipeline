@@ -1,0 +1,29 @@
+# Pipeline-only processing settings for the falls water estimate (SATELLITE_WATER_SPEC.md §7).
+# The rule thresholds (levels, staleness, gate) live in the site repo: config/falls-thresholds.yaml.
+# Nothing here is calibrated yet.
+
+s1_water:
+  speckle: { filter: median, size: 5, calibrated: false }
+  otsu_clamp_db: { min: -22, max: -14, calibrated: false }
+  # Below this between-class separation (dB between the two class means) the histogram is not bimodal: quality "poor".
+  min_separation_db: { value: 3, calibrated: false }
+  # Compare only passes in the same relative orbit.
+  same_orbit_only: true
+
+s2_falls:
+  min_valid_fraction: { value: 0.8, calibrated: false }
+  # SCL classes treated as invalid: 3 cloud shadow, 8 cloud medium, 9 cloud high, 10 cirrus, 11 snow.
+  invalid_scl: [3, 8, 9, 10, 11]
+  mndwi_threshold: { value: 0.0, calibrated: false }
+  ndwi_threshold: { value: 0.0, calibrated: false }
+
+tnsmart:
+  url_patterns:
+    - "https://beta-tnsmart.rimes.int/DATA/Rainfall/daily_reservoir/reservoir_{dd}-{mm}-{yyyy}.pdf"
+    - "https://beta-tnsmart.rimes.int/DATA/Rainfall/daily_reservoir/reservoir_{yyyy}-{mm}-{dd}.pdf"
+  # Case-insensitive name matches for the rows we parse.
+  dams:
+    pechiparai: "pech"
+    chittar_1: "chittar\\s*-?\\s*(i|1)\\b"
+    chittar_2: "chittar\\s*-?\\s*(ii|2)\\b"
+    perunchani: "perunchan"

@@ -1,0 +1,32 @@
+name: tnsmart
+# TN-SMART daily reservoir bulletins -> Pechiparai, Perunchani, Chittar I/II depth, sent PRIVATE to the site
+# (SATELLITE_WATER_SPEC.md §6.3; licence not stated, so never shown and never committed). The log prints counts only.
+# Manual only for now: the live site does not have /api/ingest/signals until the next deploy.
+# After that deploy, enable the daily run by uncommenting the schedule.
+on:
+  # schedule: [{ cron: "30 6 * * *" }]   # 12:00 IST
+  workflow_dispatch:
+    inputs:
+      from: { description: "Backfill start (YYYY-MM-DD); empty = today and yesterday", required: false }
+      to:   { description: "Backfill end (YYYY-MM-DD); empty = today", required: false }
+      dry_run: { description: "Parse only, send nothing", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  tnsmart:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      INGEST_URL: ${{ secrets.INGEST_URL }}
+      INGEST_HMAC_KEY: ${{ secrets.INGEST_HMAC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - name: Fetch, parse, send
+        run: |
+          args=""
+          if [ -n "${{ inputs.from }}" ]; then args="--from ${{ inputs.from }}"; fi
+          if [ -n "${{ inputs.to }}" ]; then args="$args --to ${{ inputs.to }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then args="$args --dry-run"; fi
+          python tnsmart/fetch_parse.py $args

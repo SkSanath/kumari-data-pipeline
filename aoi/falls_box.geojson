@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "status": "draft",
+  "todo": "From the owner's GPS pins: weir, foot of the falls, end of the bathing area (~200 m of riverbed below).",
+  "what": "Thirparappu weir + falls + riverbed below",
+  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+  "features": []
+}

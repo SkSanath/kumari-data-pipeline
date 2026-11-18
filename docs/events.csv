@@ -1,0 +1,7 @@
+date,type,level_observed,source_url,notes
+2023-06-01,irrigation_open,,,"100 cusecs; The Hindu, Kanni Poo season (from spec; source URL to add)"
+2024-02-29,irrigation_close,,,"Planned end of 2023-24 release (from spec); confirm it actually happened; source URL to add"
+2024-05-19,surplus_release,,,"500 cusecs, Collector appeal (from spec; source URL to add)"
+2024-06-01,irrigation_open,,,"Approximate date; Collector release, Pechiparai at 45.47 ft (The Hindu, from spec); exact date and URL to add"
+2024-06-10,ban,,https://www.dtnext.in/news/tamilnadu/water-overflowing-from-pechiparai-reservoir-leads-flooding-in-thiruparappu-waterfalls-789443,"Overflow from Pechiparai flooded the falls; bathing banned (date is the article's updated date)"
+2024-07-16,ban,,https://www.dtnext.in/news/tamilnadu/bathing-ban-at-thiruparappu-waterfalls-in-kanniyakumari-following-floods-795157,"Heavy rain and excess release; visiting and bathing prohibited; end date not stated"

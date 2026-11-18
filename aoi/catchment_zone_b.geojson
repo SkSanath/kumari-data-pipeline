@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "status": "draft",
+  "todo": "Derive once from Copernicus DEM GLO-30.",
+  "what": "Land draining to the river between Pechiparai and the falls (includes Chittar I/II spill paths)",
+  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+  "features": []
+}

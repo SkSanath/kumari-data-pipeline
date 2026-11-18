@@ -1,0 +1,5 @@
+# TN-SMART bulletins: licence not stated, never commit (SATELLITE_WATER_SPEC.md §2.3)
+tnsmart_cache/
+*.pdf
+__pycache__/
+.pytest_cache/
