@@ -105,7 +105,7 @@ CACHE = sorted((ROOT / "tnsmart_cache").glob("*.pdf"))
 
 
 @pytest.mark.skipif(not CACHE, reason="no local TN-SMART PDFs (private, never committed)")
-@pytest.mark.parametrize("pdf", CACHE, ids=lambda p: p.stem)
+@pytest.mark.parametrize("pdf", CACHE, ids=[p.stem for p in CACHE])
 def test_real_bulletins(pdf):
     from parse import pdf_text
 
