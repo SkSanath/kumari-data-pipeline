@@ -1,0 +1,35 @@
+name: imerg
+# NASA GPM IMERG daily rain over catchment zones A and B -> signed POST to the site (public data).
+# Schedule: Early and Late for the last 7 days (upserts; Late replaces nothing, it is its own source).
+# Manual: a backfill run (final for 2024-01..2025-09, late after that), or --probe to print the file layout.
+on:
+  # schedule: [{ cron: "40 */3 * * *" }]   # on once the owner has checked zones A and B
+  workflow_dispatch:
+    inputs:
+      run: { description: "live | early | late | final", default: "live" }
+      from: { description: "Start date (backfill)", default: "" }
+      to: { description: "End date (backfill)", default: "" }
+      probe: { description: "Only print links and layout", type: boolean, default: false }
+      dry_run: { description: "Parse only, send nothing", type: boolean, default: false }
+permissions: { contents: read }
+jobs:
+  rain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+      INGEST_URL: ${{ secrets.INGEST_URL }}
+      INGEST_HMAC_KEY: ${{ secrets.INGEST_HMAC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - name: run
+        run: |
+          ARGS="--run ${{ inputs.run || 'live' }}"
+          [ -n "${{ inputs.from }}" ] && ARGS="$ARGS --from ${{ inputs.from }}"
+          [ -n "${{ inputs.to }}" ] && ARGS="$ARGS --to ${{ inputs.to }}"
+          [ "${{ inputs.probe }}" = "true" ] && ARGS="$ARGS --probe"
+          [ "${{ inputs.dry_run }}" = "true" ] && ARGS="$ARGS --dry-run"
+          python rain/imerg.py $ARGS

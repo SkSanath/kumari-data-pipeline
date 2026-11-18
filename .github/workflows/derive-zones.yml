@@ -1,5 +1,5 @@
 name: derive-zones
-# Copernicus DEM GLO-30 -> draft catchment zones A and B + preview PNG, as an artifact.
+# Copernicus DEM GLO-30 (public AWS tile, no account) -> draft catchment zones A and B + preview PNG, as an artifact.
 # Nothing is committed or sent to the site; the owner checks the preview before the zones are used.
 on:
   workflow_dispatch: {}
@@ -8,9 +8,6 @@ jobs:
   derive:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      CDSE_CLIENT_ID: ${{ secrets.CDSE_CLIENT_ID }}
-      CDSE_CLIENT_SECRET: ${{ secrets.CDSE_CLIENT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

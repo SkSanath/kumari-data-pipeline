@@ -5,7 +5,9 @@
            minus zone A (this includes the Chittar I/II catchments, whose streams join below Pechiparai).
 
 Method (no coordinates drawn by hand):
-1. One CDSE Process API request: the DEM (COPERNICUS_30) over a bbox around the basin, resampled to 30 m in UTM 43N.
+1. The Copernicus DEM GLO-30 public tile(s) from AWS Open Data (bucket copernicus-dem-30m, licence COP-DEM-GLO-30-F
+   "Full, Free & Open": reproduction, distribution and modification allowed), only the bbox window read over HTTP,
+   resampled to 30 m in UTM 43N.
 2. Flow routing by priority-flood (Barnes et al. 2014): cells are visited from the bbox edge inwards in order of
    (filled) elevation; each cell drains to the neighbour it was reached from. Pits and flats drain sensibly, and every
    cell has exactly one path to the edge, so a catchment is just "every cell whose path reaches the target".
@@ -14,7 +16,7 @@ Method (no coordinates drawn by hand):
 
 Outputs `catchment_zone_a.geojson`, `catchment_zone_b.geojson` (status derived-draft) and a preview PNG for the owner.
 
-  python sat/derive_zones.py --out out/zones              # needs CDSE_CLIENT_ID / CDSE_CLIENT_SECRET
+  python sat/derive_zones.py --out out/zones              # no account needed
   python sat/derive_zones.py --out out/zones --from-tif out/zones/dem.tif   # no request
 """
 from __future__ import annotations
@@ -42,9 +44,8 @@ POINTS = {
     "perunchani_dam": None,  # filled from the site data when present; only drawn on the preview
 }
 
-EVALSCRIPT = """//VERSION=3
-function setup() { return { input: ["DEM"], output: { bands: 1, sampleType: "FLOAT32" } }; }
-function evaluatePixel(s) { return [s.DEM]; }"""
+CREDIT = ("produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 "
+          "provided under COPERNICUS by the European Union and ESA; all rights reserved")
 
 # D8 neighbour offsets
 NB = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
@@ -139,21 +140,38 @@ def touches_edge(mask: np.ndarray) -> bool:
 
 # ---------------------------------------------------------------- data
 
-def fetch_dem(out: Path) -> Path:
-    from cdse import Cdse
-    from derive_aois import to_utm_bbox
+def tile_url(lat0: int, lon0: int) -> str:
+    """Copernicus DEM GLO-30 public COG on AWS Open Data (bucket copernicus-dem-30m), 1 x 1 degree tile."""
+    ns, ew = ("N" if lat0 >= 0 else "S"), ("E" if lon0 >= 0 else "W")
+    name = f"Copernicus_DSM_COG_10_{ns}{abs(lat0):02d}_00_{ew}{abs(lon0):03d}_00_DEM"
+    return f"https://copernicus-dem-30m.s3.amazonaws.com/{name}/{name}.tif"
 
-    bbox = to_utm_bbox(BBOX_LONLAT)
-    body = {
-        "input": {"bounds": {"bbox": bbox, "properties": {"crs": f"http://www.opengis.net/def/crs/EPSG/0/{UTM.split(':')[1]}"}},
-                  "data": [{"type": "dem", "dataFilter": {"demInstance": "COPERNICUS_30"}, "processing": {"upsampling": "BILINEAR", "downsampling": "BILINEAR"}}]},
-        "output": {"resx": RES_M, "resy": RES_M, "responses": [{"identifier": "default", "format": {"type": "image/tiff"}}]},
-        "evalscript": EVALSCRIPT,
-    }
-    c = Cdse()
+
+def fetch_dem(out: Path) -> Path:
+    """Read only the bbox window of the GLO-30 tile(s) over HTTP (COG) and resample to 30 m UTM 43N.
+    (The CDSE Process API refuses DEM requests on our free account: HTTP 403, 18 Nov 2026.)"""
+    import math as m
+
+    import rasterio
+    from rasterio.merge import merge
+    from rasterio.warp import Resampling, calculate_default_transform, reproject
+
+    lon0, lat0, lon1, lat1 = BBOX_LONLAT
+    urls = [tile_url(la, lo) for la in range(m.floor(lat0), m.floor(lat1) + 1) for lo in range(m.floor(lon0), m.floor(lon1) + 1)]
+    srcs = [rasterio.open(u) for u in urls]
+    data, tf = merge(srcs, bounds=(lon0, lat0, lon1, lat1))
+    crs = srcs[0].crs
+    for s in srcs:
+        s.close()
+    h, w = data.shape[1:]
+    dtf, dw, dh = calculate_default_transform(crs, UTM, w, h, lon0, lat0, lon1, lat1, resolution=RES_M)
+    dst = np.full((dh, dw), np.nan, dtype="float32")
+    reproject(data[0].astype("float32"), dst, src_transform=tf, src_crs=crs, dst_transform=dtf, dst_crs=UTM,
+              resampling=Resampling.bilinear, src_nodata=None, dst_nodata=np.nan)
     path = out / "dem.tif"
-    path.write_bytes(c.process(body, "dem"))
-    print(f"DEM bbox UTM {bbox}, {RES_M} m, {c.pu:.1f} PU")
+    with rasterio.open(path, "w", driver="GTiff", width=dw, height=dh, count=1, dtype="float32", crs=UTM, transform=dtf, nodata=np.nan) as o:
+        o.write(dst, 1)
+    print(f"DEM from {len(urls)} AWS tile(s) {', '.join(u.rsplit('/', 1)[-1] for u in urls)}: {dw}x{dh} px at {RES_M} m")
     return path
 
 
@@ -209,7 +227,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="out/zones")
     ap.add_argument("--from-tif")
-    ap.add_argument("--snap-m", type=float, default=300)
+    ap.add_argument("--snap-m", type=float, default=120)
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     tif = Path(a.from_tif) if a.from_tif else fetch_dem(out)
@@ -247,7 +265,7 @@ def main() -> int:
         print("WARNING: part of zone A does not drain to the falls (check the preview)")
 
     poly_a, poly_b = mask_to_utm_polygon(zone_a, transform), mask_to_utm_polygon(zone_b, transform)
-    common = {"source": "Copernicus DEM GLO-30 via CDSE Process API, priority-flood D8 routing", "res_m": RES_M,
+    common = {"source": "Copernicus DEM GLO-30 (AWS Open Data copernicus-dem-30m), priority-flood D8 routing", "credit": CREDIT, "res_m": RES_M,
               "falls_anchor": FALLS[2], "status_note": "derived-draft; owner checks the preview"}
     (out / "catchment_zone_a.geojson").write_text(json.dumps(feature(poly_a.buffer(0), {**common, "what": "catchment_zone_a", "desc": "land draining into Pechiparai reservoir", "area_km2": rep["zone_a_km2"]}), indent=1))
     (out / "catchment_zone_b.geojson").write_text(json.dumps(feature(poly_b.buffer(0), {**common, "what": "catchment_zone_b", "desc": "land draining to the Kodayar between Pechiparai and Thirparappu Falls", "area_km2": rep["zone_b_km2"]}), indent=1))
