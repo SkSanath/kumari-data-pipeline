@@ -42,6 +42,14 @@ precipitation.precipitation[0][1], 3, -9999.9, 4.25
     assert parse_ascii(txt) == [[1.5, 0.0, 2.0], [3.0, -9999.9, 4.25]]
 
 
+def test_parse_dap4_csv():
+    txt = """Dataset: 3B-DAY-E.MS.MRG.3IMERG.20311117-S000000-E235959.V07C.nc4
+/precipitation[0][0], 0, 0.5
+/precipitation[0][1], 2.25, 0
+"""
+    assert parse_ascii(txt) == [[0.0, 0.5], [2.25, 0.0]]
+
+
 def test_opendap_link_found_or_derived():
     e = {"links": [{"href": "https://gpm1.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/x.nc4.html"}]}
     assert opendap_url(e) == "https://gpm1.gesdisc.eosdis.nasa.gov/opendap/GPM_L3/x.nc4"

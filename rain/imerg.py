@@ -3,12 +3,13 @@
 - Products (V07, GES DISC): Early `GPM_3IMERGDE` (live, ~4 h), Late `GPM_3IMERGDL` (~14 h), Final `GPM_3IMERGDF`
   (months behind). Each run is stored as its own source, so Final never silently overwrites Early; the site prefers
   Final > Late > Early for the same day.
-- Only the 0.1 degree cells over the zones are read, through the granule's OPeNDAP subset link (never a global file).
+- Only the 0.1 degree cells over the zones are read, through the granule's cloud OPeNDAP link with a DAP4 subset
+  (`.dap.csv?dap4.ce=/precipitation[0][i0:i1][j0:j1]`); never a global file. Layout checked 18 Nov 2026: (time, lon, lat).
 - Zone rain = mean of the cells weighted by the share of each cell inside the zone (areas in UTM 43N).
 - A day is UTC (IMERG's day). observed_at = 00:00 UTC of that day, meta.period = "P1D". A fill value in any cell that
   covers the zone makes that zone-day "missing", never a guess.
 
-  python rain/imerg.py --probe                          # print links and variable layout for one granule
+  python rain/imerg.py --probe                          # print links, layout and 4 cells for the latest granule
   python rain/imerg.py                                  # live: Early and Late, last 7 days
   python rain/imerg.py --run final --from 2024-01-01 --to 2025-09-30
   python rain/imerg.py --run late  --from 2025-10-01
@@ -83,11 +84,11 @@ def zone_mean(w: dict[tuple[int, int], float], grid: dict[tuple[int, int], float
 
 
 def parse_ascii(text: str, var: str = VAR) -> list:
-    """Values of `var` from an OPeNDAP DAP2 .ascii response as a nested list (time, lon, lat) or (time, lat, lon)."""
+    """Values of `var` from an OPeNDAP DAP4 `.dap.csv` (or DAP2 `.ascii`) response: one list per innermost vector."""
     body = text.split("---------------------------------------------", 1)[-1]
     rows: dict[tuple[int, ...], list[float]] = {}
     for line in body.splitlines():
-        m = re.match(rf"\s*(?:{re.escape(var)}\.{re.escape(var)}|{re.escape(var)})?((?:\[\d+\])+),\s*(.*)$", line)
+        m = re.match(rf"\s*/?(?:{re.escape(var)}\.)?{re.escape(var)}((?:\[\d+\])+),\s*(.*)$", line)
         if not m:
             continue
         idx = tuple(int(x) for x in re.findall(r"\[(\d+)\]", m.group(1)))
@@ -139,23 +140,37 @@ def opendap_url(entry: dict) -> str | None:
     return None
 
 
+def get(sess, url: str, tries: int = 4):
+    """GET with retries: the cloud OPeNDAP server sometimes times out or answers 5xx."""
+    import requests
+
+    for k in range(tries):
+        try:
+            r = sess.get(url, timeout=90)
+            if r.status_code < 500:
+                r.raise_for_status()
+                return r
+        except requests.exceptions.Timeout:
+            pass
+        time.sleep(5 * (k + 1))
+    raise TimeoutError("OPeNDAP did not answer")
+
+
 def dims(sess, url: str) -> list[str]:
-    """Dimension names of VAR from the .dds, e.g. ['time', 'lon', 'lat']."""
-    r = sess.get(url + ".dds", timeout=60)
-    r.raise_for_status()
-    m = re.search(rf"\b{VAR}((?:\[\s*\w+\s*=\s*\d+\s*\])+)", r.text)
+    """Dimension names of VAR from the DAP4 DMR, e.g. ['time', 'lon', 'lat']. (The cloud server has no DAP2 .dds.)"""
+    r = get(sess, url + ".dmr.xml")
+    m = re.search(rf'<(?:Float32|Float64)\s+name="{VAR}">(.*?)</(?:Float32|Float64)>', r.text, re.S)
     if not m:
-        raise ValueError(f"{VAR} not in DDS")
-    return re.findall(r"\[\s*(\w+)\s*=", m.group(1))
+        raise ValueError(f"{VAR} not in DMR")
+    return [d.lstrip("/") for d in re.findall(r'<Dim\s+name="([^"]+)"', m.group(1))]
 
 
 def read_cells(sess, url: str, order: list[str], cells: set[tuple[int, int]]) -> dict[tuple[int, int], float]:
     is_, js_ = [c[0] for c in cells], [c[1] for c in cells]
     i0, i1, j0, j1 = min(is_), max(is_), min(js_), max(js_)
-    sl = {"time": "[0:0]", "lon": f"[{i0}:{i1}]", "lat": f"[{j0}:{j1}]"}
+    sl = {"time": "[0]", "lon": f"[{i0}:{i1}]", "lat": f"[{j0}:{j1}]"}
     q = "".join(sl[d] for d in order)
-    r = sess.get(f"{url}.ascii?{VAR}{q}", timeout=120)
-    r.raise_for_status()
+    r = get(sess, f"{url}.dap.csv?dap4.ce=/{VAR}{q}")
     rows = parse_ascii(r.text)
     grid: dict[tuple[int, int], float] = {}
     # rows are the innermost vectors in index order; innermost dim is order[-1]
@@ -215,14 +230,9 @@ def main() -> int:
             url = opendap_url(e)
             print(f"   opendap -> {url}")
             if url:
-                for u in (url, url.replace("%3A", ":")):
-                    for suf in (".dds", ".das", ".dmr.xml", ".dmr", ".ascii?lat", ".dap.csv?dap4.ce=/lat", ".dap.csv?dap4.ce=/precipitation[0][2572:2573][983:984]",
-                                ".ascii?precipitation[0:0][2572:2573][983:984]"):
-                        try:
-                            r = sess.get(u + suf, timeout=60)
-                            print(f"   {r.status_code} {suf[:60]:<60} {r.text[:240].replace(chr(10), ' | ')}")
-                        except Exception as e:  # noqa: BLE001
-                            print(f"   ERR {suf}: {e}")
+                order = dims(sess, url)
+                print(f"   dims of {VAR}: {order}")
+                print(f"   cells (2572..2573, 983..984): {read_cells(sess, url, order, {(2572, 983), (2573, 984)})}")
         return 0
 
     zones = load_zones()
