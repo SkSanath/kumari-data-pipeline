@@ -1,10 +1,9 @@
 name: tnsmart
 # TN-SMART daily reservoir bulletins -> Pechiparai, Perunchani, Chittar I/II depth, sent PRIVATE to the site
 # (SATELLITE_WATER_SPEC.md §6.3; licence not stated, so never shown and never committed). The log prints counts only.
-# Manual only for now: the live site does not have /api/ingest/signals until the next deploy.
-# After that deploy, enable the daily run by uncommenting the schedule.
+# Daily since 18 Nov 2026 (site route deployed). Manual runs for backfill.
 on:
-  # schedule: [{ cron: "30 6 * * *" }]   # 12:00 IST
+  schedule: [{ cron: "30 6 * * *" }]   # 12:00 IST
   workflow_dispatch:
     inputs:
       from: { description: "Backfill start (YYYY-MM-DD); empty = today and yesterday", required: false }
