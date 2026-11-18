@@ -115,7 +115,15 @@ def fetch(area: str, start: str, end: str, threshold_db: float, out: Path, tok: 
         "evalscript": EVALSCRIPT.replace("THRESHOLD_DB", str(threshold_db)),
     }
     t0 = time.time()
-    r = requests.post(PROCESS_URL, json=body, headers={"Authorization": f"Bearer {tok}", "Accept": "image/tiff"}, timeout=600)
+    for attempt in range(6):
+        r = requests.post(PROCESS_URL, json=body, headers={"Authorization": f"Bearer {tok}", "Accept": "image/tiff"}, timeout=600)
+        if r.status_code != 429:
+            break
+        # Free plan: processing units per minute are limited. Wait as told (or a minute) and try again.
+        wait = int(float(r.headers.get("Retry-After", 0) or 0)) or 60 * (attempt + 1)
+        wait = min(max(wait, 30), 300)
+        print(f"{area}: rate limited (429), waiting {wait} s")
+        time.sleep(wait)
     if r.status_code != 200:
         sys.exit(f"{area}: Process API HTTP {r.status_code}: {r.text[:500]}")
     path = out / f"{area}_freq.tif"
