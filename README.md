@@ -18,3 +18,4 @@ Public repo (GitHub Actions). Phase 0: keep-alive + signed test ping. Move this 
 - Tests: `.github/workflows/tests.yml` runs `pytest` (Python 3.11, `requirements-water.txt`).
 - **TN-SMART PDFs and their numbers are never committed here** (licence not stated).
 - **TN-SMART** (`tnsmart/`): `parse.py` reads the four Kanniyakumari dams from the bulletin text and refuses rows whose numbers disagree; `fetch_parse.py` fetches, parses and sends rows marked private (`--from/--to` for backfill, `--dry-run`). Workflow `tnsmart.yml` is manual until the site route is deployed. For local real-PDF tests, put bulletins in the git-ignored `tnsmart_cache/` as `YYYY-MM-DD.pdf`.
+- **Reservoir area** (`sat/s1_reservoir.py`, workflow `s1-reservoir.yml`, daily): water area of Pechiparai and Chittar I/II per Sentinel-1 pass into `data/s1_reservoir_area.csv`. `resend_all` sends the whole series to the site (e.g. after deploy). Outlines from `sat/derive_aois.py` (owner-checked).

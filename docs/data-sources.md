@@ -25,3 +25,14 @@ Derived from a Sentinel-1 water-frequency map, not drawn by hand: see `aoi/READM
 units for two years of descending passes (free plan has a per-minute limit; the script waits and retries on 429).
 **The Kodayar between Pechiparai and the falls is not visible to Sentinel-1 at 10 m**, so the river-width signal
 (spec §7.2) cannot be built from it as specified.
+
+## Reservoir area series (step 5, 18 Nov 2026)
+- `sat/s1_reservoir.py` → `data/s1_reservoir_area.csv` (public, derived Copernicus data). Backfill 2024-01-10 to
+  2026-11-14: 85 descending passes (relative orbit 165; Sentinel-1A, and Sentinel-1D from 2026), 255 rows, 1,160 PU.
+- Every pass cleanly bimodal (classes ≥ 6.9 dB apart). Otsu clamp set to −18..−10 dB after the first run showed the
+  spec's −22..−14 example does not fit terrain-flattened gamma0 (Otsu −15.9..−10.7). 251 rows ok, 4 suspect (rises of
+  16–20% at monsoon onset; rain not checked yet).
+- Private sanity check against 6 TN-SMART bulletins (numbers not recorded here): area rises with depth, but **near full
+  the area hardly changes**, so a depth estimate around the 42 ft mark will be uncertain. Step 6 measures this.
+- Daily run 09:00 UTC; sending to the site fails softly until `/api/ingest/signals` is deployed, then
+  run the workflow once with `resend_all`.
