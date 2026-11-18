@@ -11,8 +11,8 @@ sourced dam and falls points (Wikidata / OSM). Contains modified Copernicus Sent
 | `chittar2_max.geojson` | owner-checked 18 Nov 2026 | 3.1 km² |
 | `falls_box.geojson` | draft | OSM weir to falls (217 m) + 200 m downstream, 120 m wide; replace with owner's GPS pins |
 | `kodayar_reach.geojson` | not feasible with S1 | the river between the dam and the falls is not visible as water at 10 m |
-| `catchment_zone_a.geojson` | derived-draft 18 Nov 2026 | 170.8 km², land draining into Pechiparai (`sat/derive_zones.py`) |
-| `catchment_zone_b.geojson` | derived-draft 18 Nov 2026 | 112.0 km², land draining to the Kodayar between Pechiparai and the falls (includes Chittar I/II) |
+| `catchment_zone_a.geojson` | owner-checked 18 Nov 2026 | 170.8 km², land draining into Pechiparai (`sat/derive_zones.py`) |
+| `catchment_zone_b.geojson` | owner-checked 18 Nov 2026 | 112.0 km², land draining to the Kodayar between Pechiparai and the falls (includes Chittar I/II) |
 
 Previews: `previews/preview_reservoirs.png` (yellow Pechiparai, cyan Chittar I, magenta Chittar II, red = anchor points;
 grey = share of passes that looked like water) and `previews/preview_river.png` (green = falls box draft).
@@ -24,3 +24,4 @@ does not change with the falls snap distance (60-200 m). Preview `previews/previ
 zone B, magenta Pechiparai lake, red = falls and Chittar dams). Credit: produced using Copernicus WorldDEM-30
 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union
 and ESA; all rights reserved.
+Owner checked zones A and B in Google Earth (KML) on 18 Nov 2026: they look right.
