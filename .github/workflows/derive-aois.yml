@@ -1,0 +1,26 @@
+name: derive-aois
+# Sentinel-1 water-frequency map -> draft AOIs (reservoirs, river reach, falls box) + preview PNGs, as an artifact.
+# Nothing is committed or sent to the site; the owner checks the previews before the AOIs are used.
+on:
+  workflow_dispatch:
+    inputs:
+      from: { description: "Period start", default: "2024-01-01" }
+      to: { description: "Period end", default: "2025-12-31" }
+      threshold_db: { description: "Water if VV below (dB)", default: "-18" }
+permissions: { contents: read }
+jobs:
+  derive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CDSE_CLIENT_ID: ${{ secrets.CDSE_CLIENT_ID }}
+      CDSE_CLIENT_SECRET: ${{ secrets.CDSE_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - run: python sat/derive_aois.py --out out/aoi --from "${{ inputs.from }}" --to "${{ inputs.to }}" --threshold-db "${{ inputs.threshold_db }}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: derived-aois, path: out/aoi }
