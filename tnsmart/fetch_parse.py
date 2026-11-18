@@ -13,6 +13,7 @@ A 404 is stored as missing, never filled in.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import time
 import urllib.error
@@ -31,6 +32,12 @@ SOURCE = "TN-SMART daily reservoir bulletin"
 IST = timezone(timedelta(hours=5, minutes=30))
 UA = "KumariLivePipeline/0.1"
 SIGNALS = [("dam_depth_ft", "ft", "depth_ft"), ("dam_storage_mcft", "Mcft", "storage_mcft"), ("dam_storage_pct", "%", "pct")]
+
+
+def public_reason(msg: str) -> str:
+    """A problem message safe for the PUBLIC Actions log: every number from the bulletin replaced by '#'.
+    (Dates in 'bulletin says as on ...' are replaced too; the full message goes to the site as private meta.)"""
+    return re.sub(r"\d[\d.\-]*", "#", msg)
 
 
 def urls(d: date) -> list[str]:
@@ -105,8 +112,8 @@ def main() -> int:
         rows += r
         found += pdf is not None
         missing += pdf is None
-        for k, v in problems.items():  # problems carry no numbers from the bulletin
-            print(f"{d} {k}: {v}")
+        for k, v in problems.items():
+            print(f"{d} {k}: {public_reason(v)}")
         time.sleep(0.5)  # be gentle with the publisher
     print(f"days={len(days)} bulletins={found} missing={missing} rows={len(rows)} bytes={nbytes} secs={time.time() - t0:.0f}")
     if not a.dry_run and rows:

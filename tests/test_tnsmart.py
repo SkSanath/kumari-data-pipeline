@@ -101,6 +101,14 @@ def test_bulletin_for_another_date_is_stored_as_missing(monkeypatch):
     assert all(r["value"] is None for r in rows)
 
 
+def test_log_lines_carry_no_bulletin_numbers():
+    for msg in ("percent 68.5121 does not match storage / capacity", "total depth 46.0 is not the known 48.0 ft",
+                "current depth 60.0 outside 0..48.0", "bulletin says as on 2031-03-07, expected 2031-03-08: stored as missing"):
+        out = fetch_parse.public_reason(msg)
+        assert not any(ch.isdigit() for ch in out), out
+    assert fetch_parse.public_reason("row not found") == "row not found"
+
+
 CACHE = sorted((ROOT / "tnsmart_cache").glob("*.pdf"))
 
 
