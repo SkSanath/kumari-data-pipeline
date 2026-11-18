@@ -5,8 +5,8 @@ yet re-checked against the official docs**. Each one is checked, and this file u
 
 | Source | Use | Licence / terms | Endpoint (to verify) | Checked |
 |---|---|---|---|---|
-| Copernicus Sentinel-1 GRD (CDSE) | Reservoir area, river width, falls box radar | Free, commercial OK. Credit: "Contains modified Copernicus Sentinel data [year]" | Token: `https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token`; Process API: `https://sh.dataspace.copernicus.eu/api/v1/process`; Catalog API first | not yet |
-| Copernicus Sentinel-2 L2A (CDSE) | Falls box water cover on clear days | Same as above | Same | not yet |
+| Copernicus Sentinel-1 GRD (CDSE) | Reservoir area, river width, falls box radar | Free, commercial OK. Credit: "Contains modified Copernicus Sentinel data [year]" | Token: `https://identity.dataspace.copernicus.eu/auth/realms/CDSE/protocol/openid-connect/token`; Process API: `https://sh.dataspace.copernicus.eu/api/v1/process`; Catalog API first | 18 Nov 2026: token and Catalog OK. Over the falls: S1 only **descending, relative orbit 165**, IW, VV+VH, about 00:40 UTC, **every 12 days** (21 Oct, 2 Nov, 14 Nov 2026) |
+| Copernicus Sentinel-2 L2A (CDSE) | Falls box water cover on clear days | Same as above | Same | 18 Nov 2026: 6 scenes in 30 days, cloud 30-97% (monsoon) |
 | Copernicus DEM GLO-30 | Catchment zones A and B (one-off) | Free, commercial OK | to find | not yet |
 | NASA GPM IMERG Early daily V07 (`GPM_3IMERGDE`) | Live catchment rain | NASA data: no restrictions; cite | GES DISC, via OPeNDAP or Harmony subsetting | 18 Nov 2026: V07 in CMR; latest granule = yesterday |
 | NASA GPM IMERG Final daily V07 (`GPM_3IMERGDF`) | Backfill and backtest rain | Same | Same | 18 Nov 2026: V07 in CMR; **latest granule 30 Sep 2025** (Final lags ~13 months), so later backtest days need Late or Early |
