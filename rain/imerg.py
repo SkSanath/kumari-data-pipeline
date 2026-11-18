@@ -205,7 +205,7 @@ def main() -> int:
 
     if a.probe:
         for run, (short, _) in RUNS.items():
-            g = granules(short, today - timedelta(40 if run != "final" else 500), today)
+            g = granules(short, today - timedelta(10 if run != "final" else 500), today)
             if not g:
                 print(f"{run}: no granules"); continue
             d = max(g); e = g[d]
@@ -215,7 +215,14 @@ def main() -> int:
             url = opendap_url(e)
             print(f"   opendap -> {url}")
             if url:
-                print(f"   dims of {VAR}: {dims(sess, url)}")
+                for u in (url, url.replace("%3A", ":")):
+                    for suf in (".dds", ".das", ".dmr.xml", ".dmr", ".ascii?lat", ".dap.csv?dap4.ce=/lat", ".dap.csv?dap4.ce=/precipitation[0][2572:2573][983:984]",
+                                ".ascii?precipitation[0:0][2572:2573][983:984]"):
+                        try:
+                            r = sess.get(u + suf, timeout=60)
+                            print(f"   {r.status_code} {suf[:60]:<60} {r.text[:240].replace(chr(10), ' | ')}")
+                        except Exception as e:  # noqa: BLE001
+                            print(f"   ERR {suf}: {e}")
         return 0
 
     zones = load_zones()
