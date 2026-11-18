@@ -1,0 +1,46 @@
+name: s1-reservoir
+# Pechiparai, Chittar I and Chittar II water area from each Sentinel-1 pass (spec §7.1).
+# Daily: new passes only, appended to data/s1_reservoir_area.csv (committed) and sent to the site
+# (a failed send is logged, not fatal: the CSV is the record; resend later with "resend_all").
+on:
+  schedule: [{ cron: "0 9 * * *" }]   # passes are ~00:40 UTC; catalog delay is a few hours
+  workflow_dispatch:
+    inputs:
+      from: { description: "Backfill start (YYYY-MM-DD); empty = since the last CSV row", required: false }
+      to: { description: "Backfill end (YYYY-MM-DD); empty = today", required: false }
+      send: { description: "Send new rows to the site", type: boolean, default: true }
+      resend_all: { description: "Only resend every CSV row to the site", type: boolean, default: false }
+permissions: { contents: write }
+concurrency: { group: s1-reservoir, cancel-in-progress: false }
+jobs:
+  area:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CDSE_CLIENT_ID: ${{ secrets.CDSE_CLIENT_ID }}
+      CDSE_CLIENT_SECRET: ${{ secrets.CDSE_CLIENT_SECRET }}
+      INGEST_URL: ${{ secrets.INGEST_URL }}
+      INGEST_HMAC_KEY: ${{ secrets.INGEST_HMAC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - name: Measure
+        run: |
+          args=""
+          if [ "${{ github.event_name }}" = "schedule" ]; then args="--send"; fi
+          if [ "${{ inputs.send }}" = "true" ]; then args="--send"; fi
+          if [ -n "${{ inputs.from }}" ]; then args="$args --from ${{ inputs.from }}"; fi
+          if [ -n "${{ inputs.to }}" ]; then args="$args --to ${{ inputs.to }}"; fi
+          if [ "${{ inputs.resend_all }}" = "true" ]; then args="--resend-all"; fi
+          python sat/s1_reservoir.py $args
+      - name: Save the series
+        if: always()
+        run: |
+          git config user.name "s1-reservoir"; git config user.email "s1-reservoir@users.noreply.github.com"
+          git add data/s1_reservoir_area.csv 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "S1 reservoir area: new passes"
+            git pull --rebase -q && git push -q
+          fi

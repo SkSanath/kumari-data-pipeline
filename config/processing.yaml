@@ -27,3 +27,16 @@ tnsmart:
     chittar_1: "chittar\\s*-?\\s*(i|1)\\b"
     chittar_2: "chittar\\s*-?\\s*(ii|2)\\b"
     perunchani: "perunchan"
+
+s1_reservoir:
+  res_m: 10
+  # A pass that covers less than this share of a reservoir outline is stored as missing (partial slice).
+  min_valid_fraction: { value: 0.98, calibrated: false }
+  # Change from the previous pass in the same relative orbit above which the value is "suspect"
+  # (wind roughening shrinks the apparent area). Rain is not checked yet (IMERG not built).
+  max_jump_pct: { value: 15, calibrated: false }
+  # Places, outline files and passes. Outlines are owner-checked (aoi/README.md).
+  reservoirs:
+    pechiparai: aoi/pechiparai_max.geojson
+    chittar_1: aoi/chittar1_max.geojson
+    chittar_2: aoi/chittar2_max.geojson
