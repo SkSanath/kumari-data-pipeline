@@ -1,6 +1,6 @@
 {
  "type": "FeatureCollection",
- "status": "derived-draft",
+ "status": "owner-checked",
  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
  "features": [
   {
@@ -19,11 +19,11 @@
     "method": {
      "data": "Sentinel-1 GRD IW descending, gamma0 terrain-flattened VV, Lee 5x5",
      "period": "2024-01-01..2025-12-31",
-     "water_if_vv_below_db": -18.0,
+     "water_if_vv_below_db": -18,
      "credit": "Contains modified Copernicus Sentinel data 2024-2025",
      "calibrated": false
     },
-    "todo": "Owner: check the outline on the preview; Phase 2 water-frequency method (spec \u00a75)."
+    "todo": "Phase 2 outline accepted by the owner on 2026-11-18."
    },
    "geometry": {
     "type": "Polygon",
@@ -1651,5 +1651,10 @@
     ]
    }
   }
- ]
+ ],
+ "checked": {
+  "by": "owner",
+  "on": "2026-11-18",
+  "how": "compared the preview with local knowledge: outlines match"
+ }
 }
