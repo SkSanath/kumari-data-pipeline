@@ -19,3 +19,9 @@ Google Maps, paid imagery.
 - `CDSE_CLIENT_ID`, `CDSE_CLIENT_SECRET`: OAuth client from the Copernicus Data Space dashboard (Sentinel Hub section).
 - `EARTHDATA_TOKEN`: NASA Earthdata login token.
 - `INGEST_URL`, `INGEST_HMAC_KEY`: already set (marine).
+
+## Areas of interest (18 Nov 2026)
+Derived from a Sentinel-1 water-frequency map, not drawn by hand: see `aoi/README.md`. Cost: 551 + 656 processing
+units for two years of descending passes (free plan has a per-minute limit; the script waits and retries on 429).
+**The Kodayar between Pechiparai and the falls is not visible to Sentinel-1 at 10 m**, so the river-width signal
+(spec §7.2) cannot be built from it as specified.

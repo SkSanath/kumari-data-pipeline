@@ -1,8 +1,54 @@
 {
-  "type": "FeatureCollection",
-  "status": "draft",
-  "todo": "From the owner's GPS pins: weir, foot of the falls, end of the bathing area (~200 m of riverbed below).",
-  "what": "Thirparappu weir + falls + riverbed below",
-  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
-  "features": []
+ "type": "FeatureCollection",
+ "status": "draft",
+ "crs_note": "WGS84 (EPSG:4326), lon/lat order",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "what": "falls_box",
+    "status_note": "DRAFT from OSM weir + falls point; replace with owner's GPS pins",
+    "weir": {
+     "lat": 8.392765,
+     "lng": 77.2580466,
+     "source": "OSM way/491055532"
+    },
+    "falls": {
+     "lat": 8.391332,
+     "lng": 77.2593978,
+     "source": "OSM node/4832179568 (Wikidata Q37924)"
+    },
+    "weir_to_falls_m": 217,
+    "downstream_m": 200,
+    "half_width_m": 60
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       77.261037,
+       8.390385
+      ],
+      [
+       77.260243,
+       8.389643
+      ],
+      [
+       77.257463,
+       8.392591
+      ],
+      [
+       77.258257,
+       8.393334
+      ],
+      [
+       77.261037,
+       8.390385
+      ]
+     ]
+    ]
+   }
+  }
+ ]
 }
