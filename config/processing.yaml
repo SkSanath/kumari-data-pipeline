@@ -4,7 +4,9 @@
 
 s1_water:
   speckle: { filter: median, size: 5, calibrated: false }
-  otsu_clamp_db: { min: -22, max: -14, calibrated: false }
+  # Spec example was -22..-14 (plain sigma0). With terrain-flattened gamma0 + Lee 5x5, the first backfill (85 passes,
+  # 18 Nov 2026) gave per-pass Otsu -15.9..-10.7 dB with classes >= 6.9 dB apart, so the range is set around that.
+  otsu_clamp_db: { min: -18, max: -10, calibrated: false }
   # Below this between-class separation (dB between the two class means) the histogram is not bimodal: quality "poor".
   min_separation_db: { value: 3, calibrated: false }
   # Compare only passes in the same relative orbit.
