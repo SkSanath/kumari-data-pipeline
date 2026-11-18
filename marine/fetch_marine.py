@@ -3,8 +3,7 @@
 Credit (required wherever shown): "Generated using E.U. Copernicus Marine Service Information".
 Needs a free Copernicus Marine account: secrets COPERNICUSMARINE_USERNAME / COPERNICUSMARINE_PASSWORD.
 
-NOT YET RUN: written without an account. On the first run, check the log: it prints the dataset variables and the grid
-cells it picked. Dataset ids and the sea-level variable can be changed with environment variables, without code edits.
+First run with an account: 18 Nov 2026 (waves OK). The log prints the dataset variables and the grid cells it picked. Dataset ids and the sea-level variable can be changed with environment variables, without code edits.
 """
 import math, os, sys
 from datetime import datetime, timedelta, timezone
@@ -24,7 +23,9 @@ TARGETS = [
 WAVES = os.environ.get("CMEMS_WAVES_DATASET", "cmems_mod_glo_wav_anfc_0.083deg_PT3H-i")
 WAVE_VARS = {"hs": "VHM0", "swell": "VHM0_SW1"}
 SEA_LEVEL = os.environ.get("CMEMS_SEALEVEL_DATASET", "cmems_mod_glo_phy_anfc_merged-sl_PT1H-i")
-SEA_LEVEL_VAR = os.environ.get("CMEMS_SEALEVEL_VAR", "zos")
+# total_sea_level = sea surface height above the geoid INCLUDING the tide (the ferry rule looks for low water).
+# Checked 18 Nov 2026 with copernicusmarine.describe: the dataset has no "zos".
+SEA_LEVEL_VAR = os.environ.get("CMEMS_SEALEVEL_VAR", "total_sea_level")
 BBOX = dict(minimum_longitude=76.9, maximum_longitude=77.9, minimum_latitude=7.7, maximum_latitude=8.5)
 MIN_KM, MAX_KM = 2.0, 5.0
 
