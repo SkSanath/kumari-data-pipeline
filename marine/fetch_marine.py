@@ -94,14 +94,21 @@ def main():
     try:
         s = open_ds(SEA_LEVEL, [SEA_LEVEL_VAR], start, end)
         print("sea level variables:", list(s.data_vars))
+        sl = s[SEA_LEVEL_VAR]
+        # The dataset carries a one-level "depth" axis (0.49 m); keep only time, latitude, longitude.
+        extra = [dim for dim in sl.dims if dim not in ("time", "latitude", "longitude")]
+        if extra:
+            print("sea level: dropping one-level axes", {dim: int(sl.sizes[dim]) for dim in extra})
+            sl = sl.isel({dim: 0 for dim in extra})
+        sl = sl.transpose("time", "latitude", "longitude")
         datasets.append(SEA_LEVEL)
         for t in TARGETS:
-            cell = pick_cell(s[SEA_LEVEL_VAR], t["lat"], t["lng"])
+            cell = pick_cell(sl, t["lat"], t["lng"])
             if cell is None:
                 continue
             _, i, j, d = cell
             print(f"{t['id']}: sea-level cell at {d:.1f} km")
-            for tt, v in zip(s["time"].values, s[SEA_LEVEL_VAR][:, i, j].values):
+            for tt, v in zip(sl["time"].values, sl[:, i, j].values):
                 points[t["id"]]["series"].setdefault(iso(tt), {"t": iso(tt)})["sl"] = num(v)
     except Exception as e:  # sea level is optional: waves still go up
         print("sea level skipped:", e, file=sys.stderr)
