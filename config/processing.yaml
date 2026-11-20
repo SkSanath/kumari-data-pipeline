@@ -12,6 +12,11 @@ s1_water:
   # Compare only passes in the same relative orbit.
   same_orbit_only: true
 
+s1_falls:
+  # VV below this (dB, terrain-flattened gamma0) counts as smooth open water in the falls box. Set inside the range of
+  # the reservoirs' per-pass Otsu thresholds (-15.9..-10.7 dB, 18 Nov 2026 backfill).
+  dark_db: { value: -14, calibrated: false }
+
 s2_falls:
   min_valid_fraction: { value: 0.8, calibrated: false }
   # SCL classes treated as invalid: 3 cloud shadow, 8 cloud medium, 9 cloud high, 10 cirrus, 11 snow.

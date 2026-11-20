@@ -1,0 +1,45 @@
+name: falls-box
+# Thirparappu falls box (spec §7.3): Sentinel-1 backscatter on every pass, Sentinel-2 water share on clear days.
+# Daily: new acquisitions only, appended to data/falls_box.csv (+ latest clear preview), sent to the site.
+# After the box changes (owner's GPS pins): run with rebuild ticked and from = 2024-01-01.
+on:
+  schedule: [{ cron: "30 9 * * *" }]
+  workflow_dispatch:
+    inputs:
+      from: { description: "Start (YYYY-MM-DD); empty = since the last CSV row", required: false }
+      to: { description: "End (YYYY-MM-DD); empty = today", required: false }
+      rebuild: { description: "Redo everything (box changed)", type: boolean, default: false }
+      send: { description: "Send rows to the site", type: boolean, default: true }
+permissions: { contents: write }
+concurrency: { group: falls-box, cancel-in-progress: false }
+jobs:
+  falls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CDSE_CLIENT_ID: ${{ secrets.CDSE_CLIENT_ID }}
+      CDSE_CLIENT_SECRET: ${{ secrets.CDSE_CLIENT_SECRET }}
+      INGEST_URL: ${{ secrets.INGEST_URL }}
+      INGEST_HMAC_KEY: ${{ secrets.INGEST_HMAC_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements-water.txt
+      - name: Measure
+        run: |
+          args=""
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.send }}" = "true" ]; then args="--send"; fi
+          if [ -n "${{ inputs.from }}" ]; then args="$args --from ${{ inputs.from }}"; fi
+          if [ -n "${{ inputs.to }}" ]; then args="$args --to ${{ inputs.to }}"; fi
+          if [ "${{ inputs.rebuild }}" = "true" ]; then args="$args --rebuild"; fi
+          python sat/falls_box.py $args
+      - name: Save the series
+        if: always()
+        run: |
+          git config user.name "falls-box"; git config user.email "falls-box@users.noreply.github.com"
+          git add data/falls_box.csv aoi/previews/falls_s2_latest.png 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Falls box: new acquisitions"
+            git pull --rebase -q && git push -q
+          fi
