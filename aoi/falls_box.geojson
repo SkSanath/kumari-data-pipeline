@@ -1,50 +1,130 @@
 {
  "type": "FeatureCollection",
- "status": "draft",
+ "status": "owner-pinned",
  "crs_note": "WGS84 (EPSG:4326), lon/lat order",
  "features": [
   {
    "type": "Feature",
    "properties": {
     "what": "falls_box",
-    "status_note": "DRAFT from OSM weir + falls point; replace with owner's GPS pins",
-    "weir": {
-     "lat": 8.392765,
-     "lng": 77.2580466,
-     "source": "OSM way/491055532"
-    },
-    "falls": {
-     "lat": 8.391332,
-     "lng": 77.2593978,
-     "source": "OSM node/4832179568 (Wikidata Q37924)"
-    },
-    "weir_to_falls_m": 217,
-    "downstream_m": 200,
-    "half_width_m": 60
+    "status_note": "from the owner's GPS pins, 20 Nov 2026",
+    "pins": [
+     {
+      "name": "upper falls",
+      "lat": 8.392391,
+      "lng": 77.258185,
+      "source": "owner GPS, 20 Nov 2026"
+     },
+     {
+      "name": "exact falls",
+      "lat": 8.391284,
+      "lng": 77.259428,
+      "source": "owner GPS, 20 Nov 2026"
+     },
+     {
+      "name": "lower falls",
+      "lat": 8.389084,
+      "lng": 77.260692,
+      "source": "owner GPS, 20 Nov 2026"
+     },
+     {
+      "name": "far lower falls",
+      "lat": 8.38471,
+      "lng": 77.259241,
+      "source": "owner GPS, 20 Nov 2026"
+     }
+    ],
+    "line_m": 974,
+    "half_width_m": 50,
+    "area_m2": 97309
    },
    "geometry": {
     "type": "Polygon",
     "coordinates": [
      [
       [
-       77.261037,
-       8.390385
+       77.259731,
+       8.391621
       ],
       [
-       77.260243,
-       8.389643
+       77.259765,
+       8.391587
       ],
       [
-       77.257463,
-       8.392591
+       77.259796,
+       8.391549
       ],
       [
-       77.258257,
-       8.393334
+       77.259822,
+       8.391508
       ],
       [
-       77.261037,
-       8.390385
+       77.261086,
+       8.389308
+      ],
+      [
+       77.261105,
+       8.389271
+      ],
+      [
+       77.261121,
+       8.389232
+      ],
+      [
+       77.261133,
+       8.389191
+      ],
+      [
+       77.261141,
+       8.38915
+      ],
+      [
+       77.261145,
+       8.389108
+      ],
+      [
+       77.261145,
+       8.389066
+      ],
+      [
+       77.261142,
+       8.389024
+      ],
+      [
+       77.261134,
+       8.388983
+      ],
+      [
+       77.261123,
+       8.388942
+      ],
+      [
+       77.259672,
+       8.384568
+      ],
+      [
+       77.25881,
+       8.384852
+      ],
+      [
+       77.260198,
+       8.389034
+      ],
+      [
+       77.259071,
+       8.390996
+      ],
+      [
+       77.257882,
+       8.392054
+      ],
+      [
+       77.258488,
+       8.392728
+      ],
+      [
+       77.259731,
+       8.391621
       ]
      ]
     ]
