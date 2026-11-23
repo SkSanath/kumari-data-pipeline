@@ -323,3 +323,4 @@ acquired_at,sensor,quality,why,valid_fraction,vv_db,vh_db,dark_frac,water_frac,n
 2026-11-13T05:26:30Z,s2,missing,only 7% of the box clear (cloud or shadow),0.07,,,,,,,,972,,sentinel-2c,S2C_MSIL2A_20261113T051041_N0513_R019_T43PGK_20261113T100104.SAFE,owner-pinned,2026-11-20T03:10:09Z
 2026-11-14T00:40:47Z,s1,ok,,1.0,-6.77,-12.71,0.0,,,,,972,165,sentinel-1d,S1D_IW_GRDH_1SDV_20261114T004047_20261114T004100_005456_00A6B6_E35A_COG.SAFE,owner-pinned,2026-11-20T03:05:28Z
 2026-11-18T05:26:34Z,s2,missing,only 26% of the box clear (cloud or shadow),0.261,,,,,,,,972,,sentinel-2b,S2B_MSIL2A_20261118T051109_N0513_R019_T43PGK_20261118T084845.SAFE,owner-pinned,2026-11-20T03:10:10Z
+2026-11-23T05:26:31Z,s2,ok,,1.0,,,,0.0,0.0,-0.412,-0.575,972,,sentinel-2c,S2C_MSIL2A_20261123T051121_N0513_R019_T43PGK_20261123T095510.SAFE,owner-pinned,2026-11-23T21:37:45Z
